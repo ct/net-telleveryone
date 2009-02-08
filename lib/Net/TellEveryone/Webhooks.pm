@@ -36,7 +36,7 @@ has payload => (
 has agent => (
     isa     => 'Str',
     is      => 'rw',
-    default => sub { "Net::TellEveryon/$Net::TellEveryone::VERSION (PERL)" },
+    default => sub { "Net::TellEveryone/$Net::TellEveryone::VERSION (PERL)" },
 );
 
 sub process {
