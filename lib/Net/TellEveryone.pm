@@ -1,6 +1,6 @@
 ##############################################################################
 # Net::TellEveryone - Central API to many status posting services
-# v2.06
+# v1.00
 # Copyright (c) 2009 Screaming Mongoose, LLC
 ##############################################################################
 
