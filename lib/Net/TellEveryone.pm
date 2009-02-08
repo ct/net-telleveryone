@@ -10,7 +10,6 @@ use Carp;
 use strict;
 
 use Moose;
-use Net::TellEveryone::Webhooks;
 our $VERSION = '1.00';
 
 has servicelist => (
@@ -18,36 +17,39 @@ has servicelist => (
     is      => 'ro',
     default => sub {
         qw(
-          Webhooks
+          WebHooks
           Twitter
           Identica
           Laconica
           Email
-          Friendfeed
-          Irc
+          FriendFeed
+          IRC
           Jabber
-          Aim
-          Yim
+          AIM
+          YIM
         );
     },
 );
+
+foreach my $svchash ( __PACKAGE__->servicelist ) {
+    eval "require Net::TellEveryone::$svchash";
+    if ($@) {
+        confess "Could not load Net::TellEveryone::$svchash: $@";
+    } else {
+        has $svchash => (
+            isa       => 'HashRef',
+            is        => 'rw',
+            lazy      => 1,
+            default   => sub ( {} ),
+            predicate => "has_$svchash",
+        );
+    }
+}
 
 has services => (
     isa     => 'ArrayRef',
     is      => 'rw',
     default => sub { [] },
-);
-
-has user => (
-    isa     => 'Str',
-    is      => 'rw',
-    default => sub { 1 },
-);
-
-has pass => (
-    isa     => 'Str',
-    is      => 'rw',
-    default => sub { 1 },
 );
 
 has message => (
@@ -62,18 +64,6 @@ has ref_url => (
     default => sub { 1 },
 );
 
-has payload => (
-    isa     => 'HashRef',
-    is      => 'rw',
-    default => sub { {} },
-);
-
-has url => (
-    isa     => 'Str',
-    is      => 'rw',
-    default => sub { '' },
-);
-
 has agent => (
     isa     => 'Str',
     is      => 'rw',
@@ -85,15 +75,16 @@ sub notify {
 
     foreach my $svc ( $self->services ) {
         my $class = "Net::TellEveryone::$svc";
-        my $svc_obj    = $class->new(
-            {
-                url        => $self->url,
-                agent      => $self->agent,
-                payload    => $self->payload,
-                nte_object => $self,
+        if ( defined $self->$svc ) {
+            my $svc_obj = eval { $class->new( { payload => $self->$svc, } ); };
+            if ( defined $svc_obj ) {
+                $svc_obj->process;
+            } else {
+                carp "Cannot create object for $class - $@";
             }
-        );
-        $svc_obj->process;
+        } else {
+            carp "Args HashRef for $svc undefined, skipping.";
+        }
     }
 }
 
