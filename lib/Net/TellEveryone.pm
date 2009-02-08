@@ -36,7 +36,11 @@ has ref_url => (
     default =>  sub { 1 }, 
 );
 
-
+has payload => (
+    isa     => 'HashRef',
+    is      => 'rw',
+    default => sub { {} },
+);
 
 
 1; # End of Net::TellEveryone
