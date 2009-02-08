@@ -10,7 +10,7 @@ use Carp;
 use strict;
 
 use Moose;
-use Net::Twitter
+use Net::Twitter;
 
   our $VERSION = '1.00';
 
@@ -38,8 +38,7 @@ sub process {
         password => $payload->{password},
     );
     
-    $t->update($payload->{message});
-
+    my $ret = $t->update($payload->{message});
 }
 
 1;

@@ -15,10 +15,10 @@ our $VERSION = '1.00';
 sub servicelist {
         qw(
           WebHooks
+          Twitter
         )
 }
 
-#          Twitter
 #          Identica
 #          Laconica
 #          Email
