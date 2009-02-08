@@ -10,54 +10,35 @@ use Carp;
 use strict;
 
 use Moose;
-use Moose::Util::TypeConstraints;
 use Net::Twitter
 
-our $VERSION = '1.00';
-
-has url => (
-    isa     => 'Str',
-    is      => 'rw',
-    default => sub { '' },
-);
+  our $VERSION = '1.00';
 
 has payload => (
-    isa     => 'JSON',
-    coerce  => 1,
-    is      => 'rw',
-    default => sub { '{ "payload": "0"}' },
-);
-
-has agent => (
-    isa     => 'Str',
-    is      => 'rw',
+    isa       => 'HashRef',
+    is        => 'rw',
+    lazy      => 1,
+    default   => sub { {} },
+    predicate => "has_payload",
 );
 
 has nte_object => (
-    isa => 'Net::TellEveryone',
-    is  => 'ro',
+    isa     => 'Net::TellEveryone',
+    is      => 'ro',
     require => 1,
-    weaken =>
+    weaken  => 1
 );
 
 sub process {
-    my $self = shift;
-    
-    carp 'process';
+    my $self    = shift;
+    my $payload = $self->{payload};
 
-    my $ua = LWP::UserAgent->new();
-    $ua->agent( $self->agent );
-    $ua->env_proxy;
-
-    my $req = $ua->post(
-        $self->url,
-        {
-            payload => $self->payload,
-            user    => $self->nte_object->user,
-            message => $self->nte_object->message,
-            ref_url => $self->nte_object->ref_url,
-        }
+    my $t = Net::Twitter->new(
+        username => $payload->{username},
+        password => $payload->{password},
     );
+    
+    $t->update($payload->{message});
 
 }
 
