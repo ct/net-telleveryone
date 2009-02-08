@@ -1,26 +1,19 @@
 ##############################################################################
-# Net::TellEveryone::Webhooks - Webhooks
+# Net::TellEveryone::Twitter - Twitter
 # v1.00
 # Copyright (c) 2009 Screaming Mongoose, LLC
 ##############################################################################
 
-package Net::TellEveryone::Webhooks;
+package Net::TellEveryone::Twitter;
 
 use Carp;
 use strict;
 
 use Moose;
 use Moose::Util::TypeConstraints;
-use LWP::Useragent;
-use JSON::Any;
+use Net::Twitter
 
 our $VERSION = '1.00';
-
-subtype 'JSON' => as 'Str';
-
-coerce 'JSON' => from 'HashRef' => via {
-    JSON::Any->objToJson($_);
-};
 
 has url => (
     isa     => 'Str',
