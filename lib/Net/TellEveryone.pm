@@ -15,12 +15,11 @@ our $VERSION = '1.00';
 sub servicelist {
         qw(
           WebHooks
-          Twitter
+          IRC
         )
 }
 
-#          Identica
-#          Laconica
+
 #          Email
 #          FriendFeed
 #          IRC
@@ -33,11 +32,12 @@ foreach my $svchash ( __PACKAGE__->servicelist ) {
     if ($@) {
         confess "Could not load Net::TellEveryone::$svchash - $@";
     }
+
     has $svchash => (
-        isa       => 'HashRef',
+        isa       => 'HashRef | Undef',
         is        => 'rw',
         lazy      => 1,
-        default   => sub { {} },
+        default   => sub { undef },
         predicate => "has_$svchash",
     );
 }
@@ -71,7 +71,9 @@ sub notify {
 
     foreach my $svc ( $self->servicelist ) {
         my $class = "Net::TellEveryone::$svc";
+        
         if ( defined $self->$svc ) {
+
             my $svc_obj = eval { $class->new( { payload => $self->$svc, nte_object => $self, } ) };
 
             if ( defined $svc_obj ) {
