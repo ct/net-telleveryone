@@ -13,6 +13,31 @@ use Moose;
 use Net::TellEveryone::Webhooks;
 our $VERSION = '1.00';
 
+has servicelist => (
+    isa     => 'ArrayRef',
+    is      => 'ro',
+    default => sub {
+        qw(
+          Webhooks
+          Twitter
+          Identica
+          Laconica
+          Email
+          Friendfeed
+          Irc
+          Jabber
+          Aim
+          Yim
+        );
+    },
+);
+
+has services => (
+    isa     => 'ArrayRef',
+    is      => 'rw',
+    default => sub { [] },
+);
+
 has user => (
     isa     => 'Str',
     is      => 'rw',
@@ -57,15 +82,19 @@ has agent => (
 
 sub notify {
     my $self = shift;
-    my $wh   = Net::TellEveryone::Webhooks->new(
-        {
-            url => $self->url,
-            agent => $self->agent,
-            payload => $self->payload,
-            nte_object => $self,
-        }
-    );
-    $wh->process;
+
+    foreach my $svc ( $self->services ) {
+        my $class = "Net::TellEveryone::$svc";
+        my $svc_obj    = $class->new(
+            {
+                url        => $self->url,
+                agent      => $self->agent,
+                payload    => $self->payload,
+                nte_object => $self,
+            }
+        );
+        $svc_obj->process;
+    }
 }
 
 1;    # End of Net::TellEveryone
