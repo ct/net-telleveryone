@@ -7,13 +7,14 @@ use Net::TellEveryone;
 
 my $nte = Net::TellEveryone->new(
     {
-        message => 'This is a message',
-        ref_url => 'This is a ref_url',
-        payload => {
-            foo => 'bar',
-            baz => 'quux',
+        WebHooks => {
+            url => 'http://orb.x4.net/hooktest.pl',
+            content => {
+                foo => "bar",
+                baz => "quux", 
+            }
         },
-        url => 'http://orb.x4.net:10359/'
+        
     }
     
     
