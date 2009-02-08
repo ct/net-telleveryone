@@ -12,35 +12,32 @@ use strict;
 use Moose;
 our $VERSION = '1.00';
 
-has servicelist => (
-    isa     => 'ArrayRef',
-    is      => 'ro',
-    default => sub {
+sub servicelist {
         qw(
           WebHooks
-          Twitter
-          Identica
-          Laconica
-          Email
-          FriendFeed
-          IRC
-          Jabber
-          AIM
-          YIM
-        );
-    },
-);
+        )
+}
+
+#          Twitter
+#          Identica
+#          Laconica
+#          Email
+#          FriendFeed
+#          IRC
+#          Jabber
+#          AIM
+#          YIM
 
 foreach my $svchash ( __PACKAGE__->servicelist ) {
     eval "require Net::TellEveryone::$svchash";
     if ($@) {
-        confess "Could not load Net::TellEveryone::$svchash: $@";
+        confess "Could not load Net::TellEveryone::$svchash - $@";
     }
     has $svchash => (
         isa       => 'HashRef',
         is        => 'rw',
         lazy      => 1,
-        default   => sub ( {} ),
+        default   => sub { {} },
         predicate => "has_$svchash",
     );
 }
@@ -72,10 +69,10 @@ has agent => (
 sub notify {
     my $self = shift;
 
-    foreach my $svc ( $self->services ) {
+    foreach my $svc ( $self->servicelist ) {
         my $class = "Net::TellEveryone::$svc";
         if ( defined $self->$svc ) {
-            my $svc_obj = eval { $class->new( { payload => $self->$svc, nte_obj => $self, } ) };
+            my $svc_obj = eval { $class->new( { payload => $self->$svc, nte_object => $self, } ) };
 
             if ( defined $svc_obj ) {
                 $svc_obj->process;
