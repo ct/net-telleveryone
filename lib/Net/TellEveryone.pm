@@ -10,30 +10,31 @@ use Carp;
 use strict;
 
 use Moose;
+use Net::TellEveryone::Webhooks;
 our $VERSION = '1.00';
 
 has user => (
-    isa => 'Str',
-    is  => 'rw',
-    default =>  sub { 1 }, 
+    isa     => 'Str',
+    is      => 'rw',
+    default => sub { 1 },
 );
 
 has pass => (
-    isa => 'Str',
-    is  => 'rw',
-    default =>  sub { 1 }, 
+    isa     => 'Str',
+    is      => 'rw',
+    default => sub { 1 },
 );
 
 has message => (
-    isa => 'Str',
-    is  => 'rw',
-    default =>  sub { 1 }, 
+    isa     => 'Str',
+    is      => 'rw',
+    default => sub { 1 },
 );
 
 has ref_url => (
-    isa => 'Str',
-    is  => 'rw',
-    default =>  sub { 1 }, 
+    isa     => 'Str',
+    is      => 'rw',
+    default => sub { 1 },
 );
 
 has payload => (
@@ -42,5 +43,29 @@ has payload => (
     default => sub { {} },
 );
 
+has url => (
+    isa     => 'Str',
+    is      => 'rw',
+    default => sub { '' },
+);
 
-1; # End of Net::TellEveryone
+has agent => (
+    isa     => 'Str',
+    is      => 'rw',
+    default => sub { "Net::TellEveryone/$Net::TellEveryone::VERSION (PERL)" },
+);
+
+sub notify {
+    my $self = shift;
+    my $wh   = Net::TellEveryone::Webhooks->new(
+        {
+            url => $self->url,
+            agent => $self->agent,
+            payload => $self->payload,
+            nte_object => $self,
+        }
+    );
+    $wh->process;
+}
+
+1;    # End of Net::TellEveryone

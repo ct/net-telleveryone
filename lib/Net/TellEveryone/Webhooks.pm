@@ -38,11 +38,19 @@ has payload => (
 has agent => (
     isa     => 'Str',
     is      => 'rw',
-    default => sub { "Net::TellEveryone/$Net::TellEveryone::VERSION (PERL)" },
+);
+
+has nte_object => (
+    isa => 'Net::TellEveryone',
+    is  => 'ro',
+    require => 1,
+    weaken =>
 );
 
 sub process {
     my $self = shift;
+    
+    carp 'process';
 
     my $ua = LWP::UserAgent->new();
     $ua->agent( $self->agent );
@@ -60,3 +68,4 @@ sub process {
 
 }
 
+1;
