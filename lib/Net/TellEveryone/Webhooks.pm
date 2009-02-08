@@ -18,36 +18,34 @@ our $VERSION = '1.00';
 
 subtype 'JSON' => as 'Str';
 
-coerce 'JSON'
-    => from 'HashRef'
-        => via { JSON::Any->objToJson($_) };
+coerce 'JSON' => from 'HashRef' => via { JSON::Any->objToJson($_) };
 
 has url => (
-    isa => 'Str',
-    is  => 'rw',    
-    default =>  sub { '' }, 
+    isa     => 'Str',
+    is      => 'rw',
+    default => sub { '' },
 );
 
 has payload => (
-    isa => 'JSON',
-    coerce => 1,
-    is  => 'rw',    
-    default =>  sub { '{ "payload": "0"}' }, 
+    isa     => 'JSON',
+    coerce  => 1,
+    is      => 'rw',
+    default => sub { '{ "payload": "0"}' },
 );
 
 has agent => (
-    isa => 'Str',
-    is  => 'rw',    
-    default =>  sub { "Net::TellEveryon/$Net::TellEveryone::VERSION (PERL)" }, 
+    isa     => 'Str',
+    is      => 'rw',
+    default => sub { "Net::TellEveryon/$Net::TellEveryone::VERSION (PERL)" },
 );
 
 sub process {
     my $self = shift;
-    
+
     my $ua = LWP::UserAgent->new();
     $ua->agent( $self->agent );
     $ua->env_proxy;
     my $req = $ua->post( $self->url, { payload => $self->payload } );
-    
+
 }
 
