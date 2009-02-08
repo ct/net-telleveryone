@@ -10,7 +10,7 @@ use Carp;
 use strict;
 
 use Moose;
-our $VERSION = '0.01';
+our $VERSION = '1.00';
 
 has user => (
     isa => 'Str',
