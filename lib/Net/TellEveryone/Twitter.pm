@@ -37,7 +37,31 @@ sub process {
         username => $payload->{username},
         password => $payload->{password},
     );
+
+    if ((defined $payload->{identica}) and ($payload->{identica})) {
+        $t->{apiurl}   = 'http://identi.ca/api';
+        $t->{apihost}  = 'identi.ca:80';
+        $t->{apirealm} = 'Laconica API';}
+    }
+
+    if ((defined $payload->{source}) and ($payload->{source})) {
+        $t->{source}   = $payload->{source};
+    }
     
+    if ((defined $payload->{apiurl}) and ($payload->{apiurl})) {
+        $t->{apiurl}   = $payload->{apiurl};
+    }
+    
+    if ((defined $payload->{apihost}) and ($payload->{apihost})) {
+        $t->{apihost}   = $payload->{apihost};
+    }
+    
+    if ((defined $payload->{apirealm}) and ($payload->{apirealm})) {
+        $t->{apirealm}   = $payload->{apirealm};
+    }
+    
+    $t->{useragent} = $self->nte_object->agent;
+        
     my $ret = $t->update($payload->{message});
 }
 
