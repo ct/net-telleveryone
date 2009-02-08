@@ -18,7 +18,9 @@ our $VERSION = '1.00';
 
 subtype 'JSON' => as 'Str';
 
-coerce 'JSON' => from 'HashRef' => via { JSON::Any->objToJson($_) };
+coerce 'JSON' => from 'HashRef' => via {
+    JSON::Any->objToJson($_);
+};
 
 has url => (
     isa     => 'Str',
@@ -45,7 +47,16 @@ sub process {
     my $ua = LWP::UserAgent->new();
     $ua->agent( $self->agent );
     $ua->env_proxy;
-    my $req = $ua->post( $self->url, { payload => $self->payload } );
+
+    my $req = $ua->post(
+        $self->url,
+        {
+            payload => $self->payload,
+            user    => $self->nte_object->user,
+            message => $self->nte_object->message,
+            ref_url => $self->nte_object->ref_url,
+        }
+    );
 
 }
 
