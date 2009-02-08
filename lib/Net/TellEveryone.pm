@@ -35,15 +35,14 @@ foreach my $svchash ( __PACKAGE__->servicelist ) {
     eval "require Net::TellEveryone::$svchash";
     if ($@) {
         confess "Could not load Net::TellEveryone::$svchash: $@";
-    } else {
-        has $svchash => (
-            isa       => 'HashRef',
-            is        => 'rw',
-            lazy      => 1,
-            default   => sub ( {} ),
-            predicate => "has_$svchash",
-        );
     }
+    has $svchash => (
+        isa       => 'HashRef',
+        is        => 'rw',
+        lazy      => 1,
+        default   => sub ( {} ),
+        predicate => "has_$svchash",
+    );
 }
 
 has services => (
@@ -76,7 +75,8 @@ sub notify {
     foreach my $svc ( $self->services ) {
         my $class = "Net::TellEveryone::$svc";
         if ( defined $self->$svc ) {
-            my $svc_obj = eval { $class->new( { payload => $self->$svc, } ); };
+            my $svc_obj = eval { $class->new( { payload => $self->$svc, nte_obj => $self, } ) };
+
             if ( defined $svc_obj ) {
                 $svc_obj->process;
             } else {
