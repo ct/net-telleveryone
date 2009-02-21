@@ -12,13 +12,14 @@ use strict;
 use Moose;
 our $VERSION = '1.00';
 
-sub servicelist {
-        qw(
-          WebHooks
-          IRC
-        )
-}
 
+sub servicelist {
+    qw(
+      AIM
+      WebHooks
+      IRC
+    );
+}
 
 #          Email
 #          FriendFeed
@@ -71,7 +72,7 @@ sub notify {
 
     foreach my $svc ( $self->servicelist ) {
         my $class = "Net::TellEveryone::$svc";
-        
+
         if ( defined $self->$svc ) {
 
             my $svc_obj = eval { $class->new( { payload => $self->$svc, nte_object => $self, } ) };
