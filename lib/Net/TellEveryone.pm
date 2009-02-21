@@ -6,41 +6,38 @@
 
 package Net::TellEveryone;
 
-use Carp;
+use Carp qw( carp cluck );
 use strict;
 
 use Moose;
 our $VERSION = '1.00';
-
-
+our $DEBUG = 0;
 sub servicelist {
-    qw(
-      AIM
-      WebHooks
-      IRC
-    );
+        qw(
+          WebHooks
+          IRC
+          Twitter
+          AIM
+        )
 }
 
+# TODO:
 #          Email
 #          FriendFeed
-#          IRC
 #          Jabber
-#          AIM
 #          YIM
 
 foreach my $svchash ( __PACKAGE__->servicelist ) {
     eval "require Net::TellEveryone::$svchash";
     if ($@) {
-        confess "Could not load Net::TellEveryone::$svchash - $@";
+        cluck "Could not load Net::TellEveryone::$svchash - $@" if $DEBUG;
+        next;
     }
-
-    has $svchash => (
-        isa       => 'HashRef | Undef',
+    __PACKAGE__->meta->add_attribute( $svchash => (
+        isa       => 'Maybe[HashRef]',
         is        => 'rw',
-        lazy      => 1,
-        default   => sub { undef },
-        predicate => "has_$svchash",
-    );
+        predicate => "has_$svchash"
+    ));
 }
 
 has services => (
@@ -72,20 +69,22 @@ sub notify {
 
     foreach my $svc ( $self->servicelist ) {
         my $class = "Net::TellEveryone::$svc";
-
-        if ( defined $self->$svc ) {
+        my $predicate = "has_$svc";
+        
+        if ( $self->meta->get_attribute( $svc ) && $self->$predicate ) {
 
             my $svc_obj = eval { $class->new( { payload => $self->$svc, nte_object => $self, } ) };
 
             if ( defined $svc_obj ) {
                 $svc_obj->process;
             } else {
-                carp "Cannot create object for $class - $@";
+                carp "Cannot create object for $class - $@" if $Net::TellEveryone::DEBUG;
             }
         } else {
-            carp "Args HashRef for $svc undefined, skipping.";
+            carp "Args HashRef for $svc undefined, skipping." if $Net::TellEveryone::DEBUG;
         }
     }
 }
 
+no Moose;
 1;    # End of Net::TellEveryone

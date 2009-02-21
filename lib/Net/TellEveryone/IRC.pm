@@ -25,11 +25,18 @@ has payload => (
 has nte_object => (
     isa     => 'Net::TellEveryone',
     is      => 'ro',
-    require => 1,
+    required => 1,
     weaken  => 1
 );
 
+has connected => (
+    isa       => 'Maybe[Int]',
+    is        => 'rw',
+    default   => sub { undef },
+);
+
 sub process {
+    warn "irc process called";
     my $self    = shift;
     my $payload = $self->{payload};
 
@@ -45,7 +52,11 @@ sub process {
 
     $conn->{nteirc_obj} = $self;
     $conn->add_global_handler(376, \&on_connect);
-    $irc->start;
+    $conn->add_global_handler('disconnect', \&on_disconnect);
+    $self->connected(1);
+    while ( $self->connected ) {
+        $irc->do_one_loop();
+    }
 }
 
 sub on_connect {
@@ -56,7 +67,11 @@ sub on_connect {
     $self->privmsg( $payload->{channel}, $payload->{message} );
     $self->part($payload->{channel});
     $self->disconnect;
+}
 
+sub on_disconnect { 
+    my $self = shift;
+    $self->{nteirc_obj}->connected( undef );
 }
 
 1;

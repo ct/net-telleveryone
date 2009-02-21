@@ -24,10 +24,16 @@ has payload => (
 );
 
 has nte_object => (
-    isa     => 'Net::TellEveryone',
-    is      => 'ro',
-    require => 1,
-    weaken =>
+    isa         => 'Net::TellEveryone',
+    is          => 'ro',
+    required    => 1,
+    weaken      => 1,
+);
+
+has connected => (
+    isa       => 'Maybe[Int]',
+    is        => 'rw',
+    default   => sub { undef },
 );
 
 sub process {
@@ -36,20 +42,21 @@ sub process {
     my $oscar = Net::OSCAR->new() or die $!;
 
     $oscar->set_callback_signon_done( \&signed_on );
-#    $oscar->set_callback_im_ok( \&msg_sent );
-#    $oscar->set_callback_connection_changed( \&conn_changed );
-$oscar->set_callback_error(\&error);
+    $oscar->set_callback_im_ok( \&msg_sent );
+    #$oscar->set_callback_connection_changed( \&conn_changed );
+    $oscar->set_callback_error(\&error);
     $oscar->{__payload} = $payload;
+    $oscar->{__nte_object} = $self;
 
-    $oscar->loglevel(10);
+    $oscar->loglevel(10) if $Net::TellEveryone::DEBUG;
 
-    print $payload->{screenname} . " - " . $payload->{password} . "\n";
-
+    print $payload->{screenname} . " - " . $payload->{password} . "\n" if $Net::TellEveryone::DEBUG;
+    
     $oscar->signon( $payload->{screenname}, $payload->{password} );
-    while (1) {
+    $self->connected(1);
+    
+    while ( $self->connected ) {
         $oscar->do_one_loop();
-
-        # Do stuff
     }
 }
 
@@ -64,24 +71,22 @@ sub error($$$$$) {
 sub signed_on {
     my $oscar   = shift;
     my $payload = $oscar->{__payload};
-    die;
-    print "Signed on\n";
+    #die;
+    print "Signed on\n" if $Net::TellEveryone::DEBUG;
     $oscar->send_im( $payload->{recipient}, $payload->{message} ) or carp $!;
-
 }
 
 sub msg_sent {
     my ( $oscar, $to, $reqid ) = @_;
-
-    print "Message $reqid sent to $to\n";
-    #$oscar->signoff;
-
+    print "Message $reqid sent to $to\n" if $Net::TellEveryone::DEBUG;
+    $oscar->{__nte_object}->connected( undef );
+    $oscar->signoff;
 }
 
 
 sub conn_changed {
     my ( $oscar, $connection, $status ) = @_;
-    print "CONN_CHANGED - $status \n";
+    print "CONN_CHANGED - $status \n" if $Net::TellEveryone::DEBUG;
 }
 
 1;

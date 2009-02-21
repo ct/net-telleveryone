@@ -25,13 +25,14 @@ has payload => (
 has nte_object => (
     isa     => 'Net::TellEveryone',
     is      => 'ro',
-    require => 1,
+    required => 1,
     weaken  => 1
 );
 
 sub process {
     my $self    = shift;
     my $payload = $self->{payload};
+    warn "begin twitter processing";
 
     my $t = Net::Twitter->new(
         username => $payload->{username},
@@ -41,7 +42,7 @@ sub process {
     if ((defined $payload->{identica}) and ($payload->{identica})) {
         $t->{apiurl}   = 'http://identi.ca/api';
         $t->{apihost}  = 'identi.ca:80';
-        $t->{apirealm} = 'Laconica API';}
+        $t->{apirealm} = 'Laconica API';
     }
 
     if ((defined $payload->{source}) and ($payload->{source})) {
@@ -61,8 +62,9 @@ sub process {
     }
     
     $t->{useragent} = $self->nte_object->agent;
-        
+    warn "about to send twitter message \n";
     my $ret = $t->update($payload->{message});
+    warn "ret is $ret \n"
 }
 
 1;

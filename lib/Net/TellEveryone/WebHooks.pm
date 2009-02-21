@@ -27,8 +27,8 @@ has payload => (
 has nte_object => (
     isa     => 'Net::TellEveryone',
     is      => 'ro',
-    require => 1,
-    weaken =>
+    required => 1,
+    weaken   => 1,
 );
 
 sub process {
